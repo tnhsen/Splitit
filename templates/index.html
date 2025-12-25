@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SplitIt - {{username}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4cc9f0;
+            --success-color: #4caf50;
+            --danger-color: #f72585;
+            --bg-body: #f0f2f5;
+            --sidebar-bg: #1e1e2d;
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--bg-body);
+            color: #333;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            color: rgba(255, 255, 255, 0.8);
+            min-height: 100vh;
+            padding: 25px 20px;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar h6 {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 20px;
+            margin-bottom: 15px;
+        }
+
+        .user-profile {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .list-group-item-action {
+            border-radius: 10px !important;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+            border: none !important;
+            padding: 12px 15px;
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .list-group-item-action:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+        }
+
+        .active-g {
+            background: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        .main-content {
+            padding: 40px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .bill-card {
+            margin-bottom: 25px;
+            background: #fff;
+            overflow: hidden;
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-control:focus {
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            border-radius: 10px;
+            padding: 8px 20px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary { background-color: var(--primary-color); border: none; }
+        .btn-primary:hover { background-color: var(--secondary-color); transform: scale(1.02); }
+        .btn-success { background-color: var(--success-color); border: none; }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 400;
+        }
+
+        .badge-proof {
+            cursor: pointer;
+            background-color: var(--accent-color) !important;
+            color: #fff !important;
+        }
+
+        .badge-no-proof {
+            background-color: #f1f3f5 !important;
+            color: #495057 !important;
+            border: none;
+        }
+
+        .text-primary { color: var(--primary-color) !important; }
+        hr { opacity: 0.1; }
+
+        .placeholder-ui {
+            background: #fff;
+            padding: 50px;
+            border-radius: 30px;
+            margin-top: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 sidebar">
+                <div class="user-profile d-flex justify-content-between align-items-center">
+                    <span><small style="display:block; opacity: 0.6;">สวัสดี,</small> <b>{{username}}</b></span>
+                    <a href="{{url_for('logout')}}" class="btn btn-sm btn-outline-danger" style="border-radius: 8px;">ออก</a>
+                </div>
+
+                <div id="invite_box" class="alert alert-info d-none small p-3 mb-3" style="border-radius: 15px; background: rgba(76, 201, 240, 0.1); border: 1px solid var(--accent-color); color: #fff;">
+                    <h6 class="text-white mb-2" style="opacity: 1;">🔔 คำเชิญกลุ่ม:</h6>
+                    <div id="invite_list"></div>
+                </div>
+
+                <h6>📁 กลุ่มทริป/เพื่อน</h6>
+                <div class="input-group mb-3">
+                    <input type="text" id="g_name" class="form-control form-control-sm bg-dark text-white border-0" placeholder="ชื่อกลุ่มใหม่..." style="background: rgba(255,255,255,0.05) !important;">
+                    <button class="btn btn-sm btn-primary" onclick="createGroup()">+</button>
+                </div>
+                <div id="group_list" class="list-group list-group-flush"></div>
+            </div>
+
+            <div class="col-md-9 main-content">
+                <div id="main_ui" class="d-none">
+                    <div class="d-flex align-items-center mb-4">
+                        <div style="width: 10px; height: 35px; background: var(--primary-color); border-radius: 5px; margin-right: 15px;"></div>
+                        <h2 id="cur_g_title" class="mb-0 fw-bold"></h2>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-7">
+                            <div class="card p-4 mb-4">
+                                <h5 class="fw-bold mb-4">➕ สร้างบิลใหม่</h5>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">ชื่อรายการ</label>
+                                    <input type="text" id="bill_title" class="form-control" placeholder="เช่น ค่าสเต็กมื้อเย็น" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small text-muted">ยอดเงินรวมทั้งหมด</label>
+                                    <input type="number" id="total_bill" class="form-control" placeholder="0.00" />
+                                </div>
+                                
+                                <div class="p-3 bg-light rounded-4 mb-3">
+                                    <h6 class="fw-bold small mb-3">🍕 แยกรายการย่อย (เฉพาะคน)</h6>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-5">
+                                            <input type="text" id="it_name" class="form-control form-control-sm" placeholder="ค่าน้ำ/ของกิน" />
+                                        </div>
+                                        <div class="col-3">
+                                            <input type="number" id="it_price" class="form-control form-control-sm" placeholder="ราคา" />
+                                        </div>
+                                        <div class="col-4 small d-flex align-items-center" id="eaters_check"></div>
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary w-100" onclick="addItem()">+ เพิ่มเข้ารายการ</button>
+                                    
+                                    <table id="items_table" class="table table-sm mt-3 d-none small">
+                                        <thead class="text-muted"><tr><th>รายการ</th><th>ราคา</th><th>คนทาน</th></tr></thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <h6 class="fw-bold small mb-2 text-danger">🚫 ไม่หารยอดกลาง</h6>
+                                        <div id="ex_check" class="small p-2 border rounded"></div>
+                                    </div>
+                                    <div class="col-6">
+                                        <h6 class="fw-bold small mb-2 text-primary">💳 คนสำรองจ่าย</h6>
+                                        <div id="payers_box" class="small p-2 border rounded"></div>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary btn-lg w-100 shadow" onclick="postBill()">บันทึกและแจ้งเตือนเพื่อน ✨</button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5">
+                            <div class="card p-4 shadow-sm mb-4">
+                                <h5 class="fw-bold mb-4">👥 สมาชิกในกลุ่ม</h5>
+                                <div class="input-group mb-3">
+                                    <input type="text" id="target_u" class="form-control" placeholder="ระบุ Username..." />
+                                    <button class="btn btn-dark" onclick="invite()">เชิญเพื่อน</button>
+                                </div>
+                                <div id="member_list" class="p-3 bg-light rounded-4 text-center"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5" />
+                    <h5 class="fw-bold mb-4">📜 ประวัติบิลและการชำระเงิน</h5>
+                    <div id="bill_history" class="row"></div>
+                </div>
+
+                <div id="placeholder" class="text-center placeholder-ui shadow-sm">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3504/3504313.png" width="120" class="mb-4 opacity-50" alt="folder">
+                    <h4 class="fw-bold">ยินดีต้อนรับสู่ SplitIt</h4>
+                    <p class="text-muted">กรุณาเลือกกลุ่มจากแถบด้านซ้าย หรือสร้างกลุ่มใหม่เพื่อเริ่มหารบิล</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      let members = [],
+        items = [],
+        currentG = "",
+        lastS = [];
+      const currentUser = "{{username}}";
+
+      async function createGroup() {
+        const n = document.getElementById("g_name").value;
+        if (!n) return;
+        await fetch("/create_group", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ group_name: n }),
+        });
+        loadGroups();
+        document.getElementById("g_name").value = "";
+      }
+
+      async function loadGroups() {
+        const r = await fetch("/get_groups");
+        const d = await r.json();
+        document.getElementById("group_list").innerHTML = d.groups
+          .map(
+            (g) =>
+              `<button class="list-group-item list-group-item-action text-white bg-transparent border-0 ${
+                g === currentG ? "active-g" : ""
+              }" onclick="selectGroup('${g}')">${g}</button>`
+          )
+          .join("");
+      }
+
+      async function selectGroup(n) {
+        currentG = n;
+        items = [];
+        document.getElementById("main_ui").classList.remove("d-none");
+        document.getElementById("placeholder").classList.add("d-none");
+        document.getElementById("cur_g_title").innerText = "📍 " + n;
+        loadGroups();
+        loadMembers();
+        loadBills();
+      }
+
+      async function invite() {
+        const u = document.getElementById("target_u").value;
+        const r = await fetch("/send_invitation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ group_name: currentG, username: u }),
+        });
+        const d = await r.json();
+        alert(d.message);
+        document.getElementById("target_u").value = "";
+      }
+
+      async function loadMembers() {
+        const r = await fetch(`/get_group_members/${currentG}`);
+        const d = await r.json();
+        members = d.members;
+        document.getElementById("member_list").innerText = members.join(", ");
+        document.getElementById("eaters_check").innerHTML = members
+          .map(
+            (m) =>
+              `<label class="me-1"><input type="checkbox" value="${m}" class="e-cb"> ${m}</label>`
+          )
+          .join("");
+        document.getElementById("ex_check").innerHTML = members
+          .map(
+            (m) =>
+              `<label class="me-1"><input type="checkbox" value="${m}" class="ex-cb"> ${m}</label>`
+          )
+          .join("");
+        document.getElementById("payers_box").innerHTML = members
+          .map(
+            (m) =>
+              `<div>${m} จ่าย: <input type="number" class="p-amt" data-name="${m}" value="0" style="width:70px"></div>`
+          )
+          .join("");
+      }
+
+      function addItem() {
+        const n = document.getElementById("it_name").value,
+          p = document.getElementById("it_price").value;
+        const e = Array.from(document.querySelectorAll(".e-cb:checked")).map(
+          (c) => c.value
+        );
+        if (n && p && e.length) {
+          items.push({ name: n, price: p, eaters: e });
+          document.getElementById("items_table").classList.remove("d-none");
+          document.querySelector(
+            "#items_table tbody"
+          ).innerHTML += `<tr><td>${n}</td><td>${p}</td><td>${e.join(
+            ","
+          )}</td></tr>`;
+        }
+      }
+
+      async function postBill() {
+        const b_title = document.getElementById("bill_title").value;
+        if (!b_title) return alert("ตั้งชื่อบิลก่อน");
+        const p_data = Array.from(document.querySelectorAll(".p-amt")).map(
+          (i) => ({ name: i.dataset.name, amount: i.value })
+        );
+        const ex = Array.from(document.querySelectorAll(".ex-cb:checked")).map(
+          (c) => c.value
+        );
+
+        const r = await fetch("/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            members,
+            total_bill: document.getElementById("total_bill").value,
+            items,
+            exclude_common: ex,
+            payers: p_data,
+          }),
+        });
+        const d = await r.json();
+
+        await fetch("/post_bill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            group_name: currentG,
+            bill_name: b_title,
+            total_amount: document.getElementById("total_bill").value,
+            settlements: d.settlements,
+            payers: p_data,
+          }),
+        });
+        location.reload();
+      }
+
+      async function loadBills() {
+        const r = await fetch(`/get_bills/${currentG}`);
+        const d = await r.json();
+        const currentUser = "{{username}}";
+
+        document.getElementById("bill_history").innerHTML = d.bills
+          .map((b) => {
+            const isOneOfPayers = b.payers.includes(currentUser);
+            const hasPaid = b.payments.some((p) => p.username === currentUser);
+
+            const peopleWhoNeedToReturnMoney = [];
+            b.settlements.forEach((s) => {
+              const debtor = s.split(" โอนให้ ")[0].trim();
+
+              if (
+                !b.payers.includes(debtor) &&
+                !peopleWhoNeedToReturnMoney.includes(debtor)
+              ) {
+                peopleWhoNeedToReturnMoney.push(debtor);
+              }
+            });
+
+            const peopleWhoAlreadyPaid = b.payments.map((p) => p.username);
+
+            const isFullyPaid = peopleWhoNeedToReturnMoney.every((m) =>
+              peopleWhoAlreadyPaid.includes(m)
+            );
+
+            const hasDebtors = peopleWhoNeedToReturnMoney.length > 0;
+            const bgColor = hasDebtors && !isFullyPaid ? "#fff5f5" : "#ffffff";
+            const borderColor =
+              hasDebtors && !isFullyPaid ? "#dc3545" : "#0d6efd";
+
+            return `
+            <div class="card p-4 bill-card mb-3 shadow-sm" 
+                 style="background-color: ${bgColor}; border-left: 6px solid ${borderColor};">
+                
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h5 class="mb-1 fw-bold text-dark">📌 ${b.bill_name}</h5>
+                        <div class="mb-2">
+                            ${hasDebtors && !isFullyPaid ? '<span class="badge bg-danger">⏳ รอเพื่อนคืนเงิน</span>' : ""}
+                            ${hasDebtors && isFullyPaid ? '<span class="badge bg-success">✅ คืนครบแล้ว</span>' : ""}
+                        </div>
+                        <h6 class="text-primary mb-0 fw-bold">฿ ${b.total}</h6>
+                    </div>
+                    <div class="text-end">
+                        <small class="d-block text-muted small mb-1">สำรองจ่ายโดย:</small>
+                        <span class="badge bg-dark" style="opacity: 0.8">${b.payers.join(", ")}</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 p-3 bg-light rounded-3 small text-secondary border-0" style="white-space: pre-wrap; font-family: monospace;">${b.settlements.join("\n")}</div>
+                <hr class="my-3">
+                
+                <div id="action_area_${b.id}">
+                    ${isOneOfPayers ? `<div class="text-center p-2 bg-light rounded-3 small text-muted">คุณสำรองจ่ายบิลนี้ (รอรับเงิน)</div>`
+                                    : hasPaid ? `<div class="text-center p-2 bg-success bg-opacity-10 text-success rounded-3 small border border-success border-opacity-10">✔ แจ้งโอนเรียบร้อย</div>`
+                                    : `<div class="d-flex gap-2 align-items-center">
+                                          <input type="text" id="proof_${b.id}" class="form-control form-control-sm" placeholder="แนบสลิป (URL)...">
+                                          <button class="btn btn-sm btn-success px-4" onclick="pay('${b.id}')">แจ้งจ่าย</button>
+                                       </div>`
+                    }
+                </div>
+
+                <div class="mt-3">
+                    ${b.payments.length > 0 ? '<div class="small text-muted mb-2">ตรวจสอบสถานะ:</div>' : ""}
+                    <div class="d-flex flex-wrap gap-2">
+                        ${b.payments.map((p) => {
+                                const isMe = p.username === currentUser;
+                                const hasProof = p.proof && p.proof.trim() !== "";
+                                return `<span class="badge ${hasProof ? "badge-proof" : "badge-no-proof"}" 
+                                              title="เวลาแจ้ง: ${p.time}" 
+                                              ${hasProof ? `onclick="window.open('${p.proof}')"` : ""}>
+                                              ${isMe ? "🙋‍♂️ คุณ" : "✅ " + p.username} ${hasProof ? "📎" : ""}
+                                        </span>`;
+                            }).join("")}
+                    </div>
+                </div>
+            </div>`;
+          })
+          .join("");
+      }
+
+      async function pay(id) {
+        const p = document.getElementById(`proof_${id}`).value;
+        await fetch("/pay_bill", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ bill_id: id, proof: p }),
+        });
+        loadBills();
+      }
+
+      async function checkInvites() {
+        const r = await fetch("/get_my_invitations");
+        const d = await r.json();
+        if (d.invitations.length) {
+          document.getElementById("invite_box").classList.remove("d-none");
+          document.getElementById("invite_list").innerHTML = d.invitations
+            .map(
+              (i) =>
+                `<div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>${i.sender} -> ${i.group_name}</span>
+                    <button class="btn btn-xs btn-light py-0 px-2" style="font-size: 0.7rem;" onclick="respond('${i.id}','accepted')">รับ</button>
+                 </div>`
+            )
+            .join("");
+        }
+      }
+      async function respond(id, res) {
+        await fetch("/respond_invitation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invite_id: id, response: res }),
+        });
+        location.reload();
+      }
+
+      loadGroups();
+      setInterval(checkInvites, 5000);
+    </script>
+</body>
+</html>
