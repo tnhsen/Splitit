@@ -184,7 +184,7 @@ def pay_bill():
     })
     return jsonify({'status': 'success'})
 
-@app.route('/ping')
+@app.route('/ping', strict_slashes=False)
 def ping():
     return "Server is live!", 200
 
