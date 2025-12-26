@@ -1,0 +1,7 @@
+flask
+pymongo
+dnspython
+flask-login
+werkzeug
+python-dotenv
+gunicorn
