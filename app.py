@@ -8,9 +8,9 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
-basedir = os.path.abspath(os.path.dirname(__file__))
-env_path = os.path.join(basedir, '.env')
-load_dotenv(env_path)
+# basedir = os.path.abspath(os.path.dirname(__file__))
+# env_path = os.path.join(basedir, '.env')
+# load_dotenv(env_path)
 
 app.secret_key = os.getenv('SECRET_KEY', 'default-secret-key')
 MONGO_URI = os.getenv('MONGO_URI')
