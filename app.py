@@ -184,5 +184,9 @@ def pay_bill():
     })
     return jsonify({'status': 'success'})
 
+@app.route('/ping')
+def ping():
+    return "Server is live!", 200
+
 if __name__ == '__main__':
     app.run(debug=True)
